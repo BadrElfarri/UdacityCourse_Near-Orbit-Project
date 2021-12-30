@@ -8,8 +8,6 @@ user-specified criteria.
 Under normal circumstances, the main module creates one NEODatabase from the
 data on NEOs and close approaches extracted by `extract.load_neos` and
 `extract.load_approaches`.
-
-You'll edit this file in Tasks 2 and 3.
 """
 
 
@@ -42,11 +40,9 @@ class NEODatabase:
         self._neos = neos
         self._approaches = approaches
 
-        # TODO: What additional auxiliary data structures will be useful?
         self.neoDesignationationDict = {neo.designation: neo for neo in neos}
         self.neoNamesDict = {neo.name: neo for neo in neos}
 
-        # TODO: Link together the NEOs and their close approaches.
         for approach in approaches:
             if self.neoDesignationationDict[approach._designation]:
                 approach.neo = self.neoDesignationationDict[approach._designation]
@@ -68,7 +64,6 @@ class NEODatabase:
         :param designation: The primary designation of the NEO to search for.
         :return: The `NearEarthObject` with the desired primary designation, or `None`.
         """
-        # TODO: Fetch an NEO by its primary designation.
         return self.neoDesignationationDict.get(designation, None)
 
     def get_neo_by_name(self, name):
@@ -85,7 +80,6 @@ class NEODatabase:
         :param name: The name, as a string, of the NEO to search for.
         :return: The `NearEarthObject` with the desired name, or `None`.
         """
-        # TODO: Fetch an NEO by its name.
         return self.neoNamesDict.get(name, None)
 
 
@@ -103,7 +97,6 @@ class NEODatabase:
         :param filters: A collection of filters capturing user-specified criteria.
         :return: A stream of matching `CloseApproach` objects.
         """
-        # TODO: Generate `CloseApproach` objects that match all of the filters.
         for approach in self._approaches:
             #All filters must return true to yield the approach 
             if all(map(lambda filter: filter(approach), filters)):

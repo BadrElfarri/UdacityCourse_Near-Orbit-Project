@@ -9,8 +9,6 @@ formatted as described in the project instructions, into a collection of
 
 The main module calls these functions with the arguments provided at the command
 line, and uses the resulting collections to build an `NEODatabase`.
-
-You'll edit this file in Task 2.
 """
 import csv
 import json
@@ -24,7 +22,6 @@ def load_neos(neo_csv_path):
     :param neo_csv_path: A path to a CSV file containing data about near-Earth objects.
     :return: A collection of `NearEarthObject`s.
     """
-    # TODO: Load NEO data from the given CSV file.
     with open(neo_csv_path, 'r') as infile:
         reader = csv.reader(infile)
         
@@ -47,7 +44,6 @@ def load_approaches(cad_json_path):
     :param cad_json_path: A path to a JSON file containing data about close approaches.
     :return: A collection of `CloseApproach`es.
     """
-    # TODO: Load close approach data from the given JSON file.
     with open(cad_json_path) as f:
         jsonData = json.load(f)
 
@@ -60,12 +56,7 @@ def load_approaches(cad_json_path):
             designation = item[itemsIndexInData['des']], time = item[itemsIndexInData['cd']], 
             distance = item[itemsIndexInData['dist']], velocity = item[itemsIndexInData['v_rel']]) for item in data]
 
-    #print(closeApproaches)
-    #fields:
-    #["des","orbit_id","jd","cd","dist","dist_min","dist_max","v_rel","v_inf","t_sigma_f","h"]
-    # we are going to use des, cd, dist, v_rel
-
-    #data is an array of array of data
+    #data is an array of CloseApproach Dictionary
     return closeApproaches
 
 if __name__ == '__main__':   
