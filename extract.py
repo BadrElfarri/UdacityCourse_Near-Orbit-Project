@@ -25,7 +25,20 @@ def load_neos(neo_csv_path):
     :return: A collection of `NearEarthObject`s.
     """
     # TODO: Load NEO data from the given CSV file.
-    return ()
+    with open(neo_csv_path, 'r') as infile:
+        reader = csv.reader(infile)
+        
+        fields = next(reader)  #get the header.
+        fieldsOfInterest = ['pdes', 'name', 'pha', 'diameter'] #`designation`, `name`, `diameter`, and `hazardous`
+        fieldsOfInterestIndex = {fieldOfInterest: fields.index(fieldOfInterest) for fieldOfInterest in fieldsOfInterest}
+        
+        NearEarthObjects = []
+        for row in reader:
+            NearEarthObjects.append(NearEarthObject(
+                designation = row[fieldsOfInterestIndex['pdes']], name= row[fieldsOfInterestIndex['name']], 
+                diameter=row[fieldsOfInterestIndex['diameter']], hazardous=row[fieldsOfInterestIndex['pha']]))
+
+    return NearEarthObjects
 
 
 def load_approaches(cad_json_path):
@@ -35,4 +48,25 @@ def load_approaches(cad_json_path):
     :return: A collection of `CloseApproach`es.
     """
     # TODO: Load close approach data from the given JSON file.
-    return ()
+    with open(cad_json_path) as f:
+        jsonData = json.load(f)
+
+    fields = jsonData['fields']
+    fieldsOfInterest = ['des', 'cd', 'dist', 'v_rel'] #des = designation, cd = time, dist = distance, v_rel = velocity
+    itemsIndexInData = {fieldOfInterest: fields.index(fieldOfInterest) for fieldOfInterest in fieldsOfInterest}  #get index of the data array that we are interrested in
+
+    data = jsonData['data']
+    closeApproaches = [CloseApproach(
+            designation = item[itemsIndexInData['des']], time = item[itemsIndexInData['cd']], 
+            distance = item[itemsIndexInData['dist']], velocity = item[itemsIndexInData['v_rel']]) for item in data]
+
+    #print(closeApproaches)
+    #fields:
+    #["des","orbit_id","jd","cd","dist","dist_min","dist_max","v_rel","v_inf","t_sigma_f","h"]
+    # we are going to use des, cd, dist, v_rel
+
+    #data is an array of array of data
+    return closeApproaches
+
+if __name__ == '__main__':   
+    load_approaches('data/cad.json')

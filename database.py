@@ -43,8 +43,17 @@ class NEODatabase:
         self._approaches = approaches
 
         # TODO: What additional auxiliary data structures will be useful?
+        self.neoDesignationationDict = {neo.designation: neo for neo in neos}
+        self.neoNamesDict = {neo.name: neo for neo in neos}
 
         # TODO: Link together the NEOs and their close approaches.
+        for approach in approaches:
+            if self.neoDesignationationDict[approach._designation]:
+                approach.neo = self.neoDesignationationDict[approach._designation]
+                self.neoDesignationationDict[approach._designation].approaches.append(approach)
+            else:
+                continue
+
 
     def get_neo_by_designation(self, designation):
         """Find and return an NEO by its primary designation.
@@ -60,7 +69,7 @@ class NEODatabase:
         :return: The `NearEarthObject` with the desired primary designation, or `None`.
         """
         # TODO: Fetch an NEO by its primary designation.
-        return None
+        return self.neoDesignationationDict.get(designation, None)
 
     def get_neo_by_name(self, name):
         """Find and return an NEO by its name.
@@ -77,7 +86,8 @@ class NEODatabase:
         :return: The `NearEarthObject` with the desired name, or `None`.
         """
         # TODO: Fetch an NEO by its name.
-        return None
+        return self.neoNamesDict.get(name, None)
+
 
     def query(self, filters=()):
         """Query close approaches to generate those that match a collection of filters.
@@ -95,4 +105,16 @@ class NEODatabase:
         """
         # TODO: Generate `CloseApproach` objects that match all of the filters.
         for approach in self._approaches:
-            yield approach
+            #All filters must return true to yield the approach 
+            if all(map(lambda filter: filter(approach), filters)):
+                yield approach
+            else: 
+                continue
+
+if __name__ == '__main__':
+    from extract import load_neos, load_approaches
+
+    database = NEODatabase(load_neos('data/neos.csv'), load_approaches('data/cad.json'))
+    result = database.get_neo_by_designation('not-real-designation')
+    print('hei')
+    print(result)

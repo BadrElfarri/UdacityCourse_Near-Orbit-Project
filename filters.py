@@ -18,7 +18,6 @@ You'll edit this file in Tasks 3a and 3c.
 """
 import operator
 
-
 class UnsupportedCriterionError(NotImplementedError):
     """A filter criterion is unsupported."""
 
@@ -46,12 +45,15 @@ class AttributeFilter:
         with `op=operator.le` and `value=10` will, when called on an approach,
         evaluate `some_attribute <= 10`.
 
-        :param op: A 2-argument predicate comparator (such as `operator.le`).
+        :param op: A 2-argument predicate comparator (such as `operator.le`). 
+            'operator.le' is a function comparing lower or equal
         :param value: The reference value to compare against.
         """
         self.op = op
         self.value = value
 
+    #The __call__ method makes instance objects of this type behave as callables - if we have an instance of a 
+    #subclass of AttributeFilter named f, then the code f(approach) is really evaluating f.__call__(approach).
     def __call__(self, approach):
         """Invoke `self(approach)`."""
         return self.op(self.get(approach), self.value)
@@ -71,6 +73,32 @@ class AttributeFilter:
     def __repr__(self):
         return f"{self.__class__.__name__}(op=operator.{self.op.__name__}, value={self.value})"
 
+#NEO Filters
+class HazardousFilter(AttributeFilter):
+    @classmethod
+    def get(cls, approach): #Modifing the superClass methode
+        return approach.neo.hazardous
+
+class DiameterFilter(AttributeFilter):
+    @classmethod
+    def get(cls, approach):
+        return approach.neo.diameter
+
+#Approaches Filters
+class DateFilter(AttributeFilter):
+    @classmethod
+    def get(cls, approach):
+        return approach.time.date()
+
+class DistanceFilter(AttributeFilter):
+    @classmethod
+    def get(cls, approach):
+        return approach.distance
+
+class VelocityFilter(AttributeFilter): 
+    @classmethod
+    def get(cls, approach):
+        return approach.velocity
 
 def create_filters(
         date=None, start_date=None, end_date=None,
@@ -109,7 +137,39 @@ def create_filters(
     :return: A collection of filters for use with `query`.
     """
     # TODO: Decide how you will represent your filters.
-    return ()
+    args = locals()
+    filters = []
+
+    for arg, value in args.items():
+        if value == None:
+            continue
+        #Date Filters
+        elif arg == 'date':
+            filters.append(DateFilter(operator.eq,value))
+        elif arg == 'start_date':
+            filters.append(DateFilter(operator.ge,value))
+        elif arg == 'end_date':
+            filters.append(DateFilter(operator.le,value))
+        #Distance Filters
+        elif arg == 'distance_min':
+            filters.append(DistanceFilter(operator.gt,value))
+        elif arg == 'distance_max':
+            filters.append(DistanceFilter(operator.lt,value))
+        #Velocity Filters
+        elif arg == 'velocity_min':
+            filters.append(VelocityFilter(operator.gt,value))
+        elif arg == 'velocity_max':
+            filters.append(VelocityFilter(operator.lt,value))
+        #Diameter Filters
+        elif arg == 'diameter_min':
+            filters.append(DiameterFilter(operator.gt,value))
+        elif arg == 'diameter_max':
+            filters.append(DiameterFilter(operator.lt,value))
+        #Hazardous Filters
+        elif arg == 'hazardous':
+            filters.append(HazardousFilter(operator.eq,value))
+
+    return filters
 
 
 def limit(iterator, n=None):
@@ -122,4 +182,22 @@ def limit(iterator, n=None):
     :yield: The first (at most) `n` values from the iterator.
     """
     # TODO: Produce at most `n` values from the given iterator.
-    return iterator
+    if n == None or n==0:
+        #return same iterator if n is None or 0
+        try:
+            for it in iterator:
+                yield it
+        except StopIteration:
+            pass
+
+    else:
+        #'slice' the iterator to stop after yielding n times using a own defined 'iterator'
+        it = iter(range(0, n, 1)) 
+        nexti = next(it)
+        try:
+            for i, element in enumerate(iterator):  #enumrate returns (index, element)
+                if i == nexti:
+                    yield element
+                    nexti = next(it)
+        except StopIteration:
+            pass
